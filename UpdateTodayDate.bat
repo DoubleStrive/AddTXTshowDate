@@ -2,7 +2,7 @@
 setlocal enableDelayedExpansion
 
 :: Set the target folder
-set "TARGET_FOLDER=D:\Folder\"
+set "TARGET_FOLDER=D:\Hub\"
 
 :: Ensure the target folder exists
 if not exist "%TARGET_FOLDER%" (
@@ -43,29 +43,27 @@ set "FULL_YESTERDAY_FILE_PATH=%TARGET_FOLDER%!YESTERDAY_FILE_NAME!"
 
 echo Processing folder: "%TARGET_FOLDER%"
 
-:: Check if yesterday's file exists, if so, rename it
+:: Check if yesterday's file exists, if so, delete it
 if exist "%FULL_YESTERDAY_FILE_PATH%" (
     echo Found yesterday's file: "!YESTERDAY_FILE_NAME!"
-    echo Renaming it to: "!TODAY_FILE_NAME!"
-    rename "%FULL_YESTERDAY_FILE_PATH%" "%TODAY_FILE_NAME%"
-    if exist "%FULL_TODAY_FILE_PATH%" (
-        echo File renamed successfully.
+    echo Deleting yesterday's file...
+    del "%FULL_YESTERDAY_FILE_PATH%"
+    if not exist "%FULL_YESTERDAY_FILE_PATH%" (
+        echo Yesterday's file deleted successfully.
     ) else (
-        echo File renaming failed, attempting to create new file directly.
-        :: If renaming fails (e.g., different drive, though not applicable here), delete old and create new
-        del "%FULL_YESTERDAY_FILE_PATH%" >nul 2>&1
-        type nul > "%FULL_TODAY_FILE_PATH%"
+        echo Error: Failed to delete yesterday's file.
     )
 ) else (
     echo Yesterday's file not found: "!YESTERDAY_FILE_NAME!"
-    :: If yesterday's file doesn't exist, check if today's file already exists
-    if exist "%FULL_TODAY_FILE_PATH%" (
-        echo Today's file "!TODAY_FILE_NAME!" already exists.
-    ) else (
-        echo Creating today's file: "!TODAY_FILE_NAME!"
-        type nul > "%FULL_TODAY_FILE_PATH%"
-        echo Today's file created successfully.
-    )
+)
+
+:: Create today's file (regardless of whether yesterday's file existed or was deleted)
+echo Creating today's file: "!TODAY_FILE_NAME!"
+type nul > "%FULL_TODAY_FILE_PATH%"
+if exist "%FULL_TODAY_FILE_PATH%" (
+    echo Today's file created successfully.
+) else (
+    echo Error: Failed to create today's file.
 )
 
 echo Script execution completed.
